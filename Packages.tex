@@ -3,17 +3,43 @@
 \usepackage[english]{babel}
 \usepackage{siunitx}
 \usepackage{graphicx}
+\usepackage{mathtools}
 \usepackage{tipa} % for the \ark{} command
 \usepackage{graphics} % for pdf, bitmapped graphics files
 \usepackage{times} % assumes new font selection scheme installed
 \usepackage{amsmath}
+
+\DeclareMathOperator*{\argmin}{argmin} % thin space, limits underneath in displays
+
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\theoremstyle{plain}% default
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem*{cor}{Corollary}
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}[section]
+\newtheorem{exmp}{Example}[section]
+\theoremstyle{remark}
+\newtheorem*{rem}{Remark}
+\newtheorem*{note}{Note}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
 \usepackage{latexsym}
 \usepackage{amscd}% for commutative diagrams
 \usepackage{mathrsfs} %this package is for the script font \mathscr
 \usepackage{relsize}
 \usepackage{delarray}
 \usepackage{pstricks}
-\usepackage{theorem}
+% \usepackage{theorem} % this has clash with amsthm
 \usepackage{changepage}
 \usepackage{euscript}
 \usepackage{textcomp}
@@ -192,7 +218,8 @@ intersections
 \usepackage{multirow}
 %To reference within text
 \usepackage{hyperref}
-\usepackage{apacite}
+% \usepackage{apacite}
+\usepackage{cite}
 \usepackage{lipsum}
 \usepackage{tikz-cd}
 \usepackage{float}
@@ -242,3 +269,8 @@ intersections
 	}
 \renewcommand{\listfigurename}{List of Figures}
 \renewcommand{\listtablename}{List of Tables}
+
+\setlength{\abovedisplayskip}{0pt}
+\setlength{\belowdisplayskip}{0pt}
+\setlength{\abovedisplayshortskip}{0pt}
+\setlength{\belowdisplayshortskip}{0pt}

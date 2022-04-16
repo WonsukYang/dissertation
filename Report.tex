@@ -18,11 +18,11 @@
 \fancyheadoffset{9pt}
 \fancyfootoffset{9pt}
 % Line spacing
-\renewcommand{\baselinestretch}{1.5} %1.5
+\renewcommand{\baselinestretch}{1.2} %1.5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\date{}
+\date{24.04.22}
 
-\title{Random Title on Mathematical and Computational Modelling}
+\title{Online Learning, Non-stationary Environment, and Dynamic Regret}
 \author{\\ \Large{Wonsuk Yang}
 \\
 \\
@@ -45,11 +45,13 @@ Trinity 2022
 \pagenumbering{roman}
 
 \thispagestyle{empty}
+%
+%% !!!! ABSTRACT HERE !!!!
+%
 \begin{abstract}
-\lipsum[1-2]
-
-\keywords{Keyword1 - Keyword2 - Keyword3}
-% \vspace{-10mm} %To remove added white space after
+In this work we present 
+% \keywords{Keyword1 - Keyword2 - Keyword3}
+% % \vspace{-10mm} %To remove added white space after
 \end{abstract}
 \tableofcontents
 % \thispagestyle{plain}
@@ -63,59 +65,469 @@ Trinity 2022
 
 \chapter{Introduction}
 \pagenumbering{arabic}
-\section{Motivation}
-\lipsum[1-3]
-\section{Aim and Objectives}
-\lipsum[6]
-\section{Thesis Outline}
-The remainder of this report is organised as follows:
-\begin{itemize}
-    \item[] \textbf{Chapter} \hyperref[Chap2]{\textbf{2}} --- introduces ...
-    \item[] \textbf{Chapter} \hyperref[Chap3]{\textbf{3}} --- ...
-    \item[] \textbf{Chapter} \hyperref[Chap4]{\textbf{4}} --- ...
-\end{itemize}
-\chapter{Methodology}
+% \section{Motivation}
+
+% \section{Aim and Objectives}
+
+% \section{Thesis Outline}
+% The remainder of this report is organised as follows:
+% \begin{itemize}
+%     \item[] \textbf{Chapter} \hyperref[Chap2]{\textbf{2}} --- introduces ...
+%     \item[] \textbf{Chapter} \hyperref[Chap3]{\textbf{3}} --- ...
+%     \item[] \textbf{Chapter} \hyperref[Chap4]{\textbf{4}} --- ...
+% \end{itemize}
+\chapter{Online Convex Optimization}
 \label{Chap2}
-We can cite an article as an example \cite{DeepMindRef}. \lipsum[4-8]
-\begin{table}[H]
-   \caption{Example Table}
-   \small
-   \centering
-   \begin{tabular}{lccccr}
-   \toprule[\heavyrulewidth]\toprule[\heavyrulewidth]
-   \textbf{C1} & \textbf{C2} & \textbf{C3} & \textbf{C4}\\ 
-   \midrule
-\multirow{3}{*}{\textbf{Row}}& Val & Val & \textcolor{igreen}{GreenVal}\\
-   & & Val  & \textcolor{igreen}{Val}\\
-& &  & \textcolor{igreen}{Example}\\ \hdashline
-   \bottomrule[\heavyrulewidth] 
-   \end{tabular}
+\section{Convex Optimization}
+In this section, we review basic concepts of convex analysis. We begin by defining convex set and convex function.
+\begin{defn}
+A set $ \mathcal{C} \subseteq \mathbb{R}^{d} $ is convex if for all $\mathbf{x}, \mathbf{y} \in \mathcal{C}$ and $\alpha \in [0, 1]$, $\alpha \mathbf{x} + (1 - \alpha) \mathbf{y} \in \mathcal{K}$.
+\end{defn}
+\begin{defn}
+Let $\mathcal{C}$ be a convex subset of $\mathbb{R}^d$. A function $f: \mathcal{C} \rightarrow \mathbb{R}$ is convex if for all $\mathbf{x}, \mathbf{y} \in \mathcal{C}$ and $\lambda \in [0, 1]$,
+\begin{center}
+    $f(\lambda \mathbf{x} + (1-\lambda) \mathbf{y}) \leq \lambda f(\mathbf{x}) + (1 - \lambda)f(\mathbf{y})$
+\end{center}
+The function is strictly convex if the above inequality is strict for $\mathbf{x} \neq \mathbf{y}$.
+\end{defn}
+Convexity is a desirable property in perspective of optimization because all local minimum is a global minimum. Hence, we can use local property of a convex function $f$ to obtain a global result, thereby making the problem of obtaining global minimum more tractable.
+
+\begin{defn}
+Let $\mathcal{C}$ be a subset of $\mathbb{R}^d$ and $f: \mathcal{C} \rightarrow \mathbb{R}$ be a function. A sub-gradient of $f$ at $\mathbf{x}$ is a vector $g \in \mathbb{R}^d$ such that
+\begin{center}
+    $f(\mathbf{y}) \geq f(\mathbf{x}) + g^\top(\mathbf{y} - \mathbf{x})$
+\end{center}
+for all $\mathbf{y} \in \mathcal{C}$. The set of sub-gradients of $f$ at $\mathbf{x}$ is denoted $ \partial f(\mathbf{x})$.
+\end{defn}
+Geometrically speaking, $g$ defines a hyperplane by which $f$ is bounded below.
+
+Next proposition tells that sub-gradient is closely related convexity, and with additional assumption of smoothness, sub-gradient is nothing more than a gradient.
+\begin{prop} \label{prop:grad-is-subgrad}
+Let $f: \mathcal{C} \rightarrow \mathbb{R}$ be convex. Then, $\partial f(\mathbf{x}) \neq \varnothing$ for all $\mathbf{x} \in int(\mathcal{C})$. Moreover, if $f$ is differentiable at $\mathbf{x}$, then $\partial f(\mathbf{x}) = \{\nabla f(\mathbf{x})\}$.
+\end{prop}
+Thus, we may think sub-gradients as a generalization of the gradient of a function in the context of convex analysis. From now on, we will always assume that all functions are differentiable as well as convex, unless stated otherwise.  
+
+
+\begin{defn}
+Let $\mathcal{C}$ be a convex subset of $\mathbb{R}^d$. A smooth function $f : \mathcal{C} \rightarrow \mathbb{R}$ is $\lambda$-strongly convex with respect to a norm $\lVert \cdot \rVert$ if there is a parameter $\lambda > 0$ such that for all $\mathbf{x}, \mathbf{y} \in \mathcal{C}$, 
+\begin{center}
+    $\displaystyle f(\mathbf{y}) \geq f(\mathbf{x}) + \langle \nabla f(\mathbf{x}), \mathbf{y} - \mathbf{x} \rangle + \frac{\lambda}{2}\lVert \mathbf{x} - \mathbf{y} \rVert$
+\end{center}
+\end{defn}
+\section{Online Learning}
+Online learning is well-established machine learning framework that models problems where data comes in a sequence. 
+The key difference between online learning framework and its offline counterpart is that the player makes a decision and receive feedback from the environment (adversary) \textbf{at each round}.
+
+The heart of online learning is devising an algorithm that can make a sequence of accurate predictions. To this end, we restrict to online convex programming (OCP) problems to use tools from convex optimization.
+
+\begin{defn}[Online Convex Programming \cite{Zinkevich2003OnlineCP}]
+Let $\mathcal{X} \in \mathbb{R}^d$ be a non-empty closed convex set of feasible actions and $\mathcal{F} = \{f : \mathcal{X} \rightarrow \mathbb{R} \}$ a subclass of convex functions. For each round $t=1,2,...,T$, 
+\begin{itemize}
+    \item Player makes a decision $\mathbf{x}_t \in \mathcal{X}$
+    \item Adversary chooses $f_t \in \mathcal{F}$
+    \item Player suffers a loss $f_t(\mathbf{x}_t)$, and observes $f_t$
+\end{itemize}
+The goal of the player is to minimize (static) \textbf{regret}
+\begin{center}
+    $\displaystyle Reg_T^{S} = \sum_{t=1}^{T} f_t(\mathbf{x}_t) - \min_{\mathbf{x} \in \mathcal{X}} \sum_{t=1}^{T} f_t(\mathbf{x})$
+\end{center}
+\end{defn}
+
+Regret measures the difference between total loss incurred by the player and that incurred by a single best action in hindsight. The player is "successful" if in the long run, the average regret goes to 0, $i.e.\ Reg_{T}^S = o(T)$.
+Thus, the main objective in online learning is to propose an algorithm which produces a sequence $(\mathbf{x}_t)_{t \geq 1}$ that guarantees sub-linear regret bound.
+
+
+% In addition to convexity, we will make the following assumptions. We note these assumptions are commonly made in the literature (e.g. \cite{Zinkevich2003OnlineCP, Zhang2018AdaptiveOL, Zhao2020BanditCO}) for theoretical concerns, but these assumptions naturally holds for many real-life problems as well.
+% \begin{enumerate}
+%     \item (Bounded feasible set) There exists $D > 0$ such that $\mathcal{X} \subset D\mathbb{B}$, where $\mathbb{B}$ is a closed unit ball. \label{assumption:1}
+%     \item (Bounded loss functions) For all $t \in [T]$, $\max_{\mathbf{x} \in \mathcal{X}} | f_t(\mathbf{x}) | \leq C$ for some $C \geq 0$.\label{assumption:2}
+%     \item (Lipschitz continuity) For all $\mathbf{x}, \mathbf{y} \in \mathcal{X}$ and $t \in [T]$, $|f_t(\mathbf{x}) - f_t(\mathbf{y})| \leq G \lVert \mathbf{x} - \mathbf{y} \rVert_{2}$ for some $G \geq 0$.\label{assumption:3}
+% \end{enumerate}
+% We will assume that the constants $D, C$ and $G$ are known to the player, so that they may use these constants for their strategy. Often, we can determine these constants by the problem set up.  
+
+% \begin{rem}
+% In online learning, we typically classify adversary into two types: oblivious and adaptive. Oblivious adversary chooses loss function independently of previous history. In contrast, adaptive adversary 
+% \end{rem}
+\subsection{Online Gradient Descent}
+Gradient descent is a powerful algorithm in convex analysis for finding a minimum of a function $f$. The idea behind gradient descent can be summarized by following equations,
+\begin{equation*}
+    \mathbf{x}_{t+1}^\prime = \mathbf{x}_t - \eta_t \nabla f(\mathbf{x}_t)
+\end{equation*}
+\begin{equation*}
+    \mathbf{x}_{t+1} = \Pi_\mathcal{X} (\mathbf{x}_{t+1}^\prime).
+\end{equation*}    
+$\eta_t > 0$ is called step size at time step $t$ and determines how much we move against the gradient. $\displaystyle \Pi_\mathcal{X}(\mathbf{x}) = \argmin_{\mathbf{y} \in \mathcal{X}} \lVert \mathbf{y} - \mathbf{x} \rVert_{2}$ is the projection operator, which yields point closest to the feasible set $\mathcal{X}$ of a given point $\mathbf{x} \in \mathbb{R}^d$. 
+
+Online gradient descent (OGD), an online version of gradient descent first introduced in \cite{Zinkevich2003OnlineCP}, is an elementary yet effective algorithm for online convex optimization. 
+\begin{algorithm}
+\caption{Online Gradient Descent}\label{alg:ogd}
+\begin{algorithmic}[1]
+\Require{Stopping time $T$, initial value $\mathbf{x}_1 \in \mathcal{X}$, step sizes $(\eta_t)_{t \geq 0}$}
+\For {$t = 1, ..., T$}
+\State Player makes decision $\mathbf{x}_t$
+\State Player suffers loss $f_t(\mathbf{x}_t)$, observes $f_t$
+\State Update $\mathbf{x}_{t+1} = \Pi_{\mathcal{X}} (\mathbf{x}_t - \eta_t \nabla f_t(\mathbf{x}_t))$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+We are interested in whether we can guarantee sub-linear regret using OGD. If the feasible set $\mathcal{X}$ is bounded and the loss functions $(f_t)_{t=1}^T$ are Lipschitz continuous, the answer is affirmative.
+
+\begin{prop} \label{prop:ogd-bound}
+Consider online gradient descent with constant step size, i.e. $\eta_t = \eta$ for all $t = 1, \dots, T$. Take any starting point $\mathbf{x}_1 \in \mathcal{X}$ and let $\displaystyle \mathbf{x}^{*} \in \argmin_{\mathbf{x} \in \mathcal{X}} \sum_{t=1}^{T} f_t(\mathbf{x})$. Then, the following regret bound holds 
+\begin{center}
+    $\displaystyle Reg_T^S \leq \frac{\lVert \mathbf{x}_1 - \mathbf{x}^{*} \rVert_2^2}{2\eta} + \frac{\eta}{2}\sum_{t=1}^{T} \lVert \nabla f_t(\mathbf{x}_t) \rVert_2^2$
+\end{center}
+In particular, if $\lVert \mathbf{x} - \mathbf{y} \rVert_2 \leq D$ and $\lVert \nabla f(\mathbf{x}) \rVert_2 \leq G$ for all $\mathbf{x}, \mathbf{y} \in \mathcal{X}$ and $f \in \mathcal{F}$, then OGD attains sub-linear regret bound by choosing $\eta \propto \frac{1}{\sqrt{T}}$. If so, we have
+\begin{center}
+    $Reg_T^S = O(\sqrt{T})$
+\end{center}
+\end{prop}
+
+
+
+\subsection{Mirror Descent}
+
+It is evident from the definition of OGD and proposition \ref{alg:ogd} that there is a close tie between OGD and $l_2$ norm.
+However, not all problem can be effectively modelled using $l_2$ norm. For instance, suppose our feasible set $\mathcal{X} \subset \mathbb{R}^d$ is 1-ball with respect to $l_\infty$ norm. Then, $\sup_{\mathbf{x}, \mathbf{y} \in \mathcal{X}} \lVert \mathbf{x} - \mathbf{y} \rVert_2 \leq \sqrt{2d}$ while $\sup_{\mathbf{x}, \mathbf{y} \in \mathcal{X}} \lVert \mathbf{x} - \mathbf{y} \rVert_{\infty} \leq \sqrt{2}$. Thus, we can guarantee lower regret bound if we can describe regret bound with respect to $l_\infty$ norm instead of $l_2$ norm. 
+
+%%% Frechet derivative?
+Considering norms other than $l_2$ norm poses a new challenge. While $\mathbf{x}_t \in \mathcal{X}$ is associated with norm $\lVert\ \cdot\ \rVert$, the value of gradient $\nabla f_t(\mathbf{x}_t)$ is naturally associated with the dual norm $\lVert\ \cdot\ \rVert_{*}$. Hence, the equation $\mathbf{x}_t - \eta_t \nabla f_t(\mathbf{x}_t)$ does not make sense. Moreover, what norm should we use for the projection operator? Can we use something other than norm?
+All these problems can be addressed using single framework, mirror descent. 
+
+% \begin{defn}
+% A strictly convex $\mathcal{C}^1$ function $\psi : \mathcal{X} \rightarrow \mathbb{R}$ is called Legendre if $\lim_{\mathbf{x} \rightarrow \partial \mathcal{X}} \lVert \nabla \psi(\mathbf{x}) \rVert_{*} = \infty$.
+% \end{defn}
+
+\begin{defn}
+A Bergman divergence associated with a strictly convex $\mathcal{C}^1$ function $\psi : \mathcal{X} \rightarrow \mathbb{R}$ is $B_\psi : \mathcal{X} \times \mathrm{int}\ \mathcal{X} \rightarrow \mathbb{R}$ defined as
+\begin{center}
+    $B_\psi(\mathbf{x}, \mathbf{y}) = \psi(\mathbf{x}) - \psi(\mathbf{y}) - \langle \nabla \psi(\mathbf{y}), \mathbf{x} - \mathbf{y} \rangle$.
+\end{center}
+\end{defn}
+
+Since $\psi$ is strictly convex, $B_\psi(\mathbf{x}, \mathbf{y}) \geq 0$ for all $\mathbf{x} \in \mathcal{X}, \mathbf{y} \in \mathrm{int}\ \mathcal{X}$ and $B_\psi(\mathbf{x}, \mathbf{y}) = 0$ if and only if $\mathbf{x} = \mathbf{y}$.
+
+\begin{exmp}[Euclidean norm]
+Let $\psi(\mathbf{x}) = \frac{1}{2}\lVert \mathbf{x} \rVert_{2}^2$. Then, $B_\psi(\mathbf{x}, \mathbf{y}) = \frac{1}{2} \lVert \mathbf{x} - \mathbf{y} \rVert_2^2$
+\end{exmp}
+
+\begin{exmp}[Negative Entropy]
+Denote a $d$ dimensional simplex by $\Delta^{d-1} = \{\mathbf{x} \in \mathbb{R}^d \mid \lVert \mathbf{x} \rVert_1 = 1, x_i \geq 0 \}$. 
+Define negative entropy function $\psi : \Delta^{d-1} \rightarrow \mathbb{R}$ as $\psi(\mathbf{x}) = \sum_{i=1}^d x_i \log(x_i)$, where $0 \log(0) = 0$. 
+Its Bergman divergence is $B_\psi(\mathbf{x}, \mathbf{y}) = \sum_{i=1}^d x_i \log(\frac{x_i}{y_i})$, which is also known as \textit{Kullback-Leiber (KL) divergence}.
+\end{exmp}
+
+\begin{prop}
+Let $B_{\psi}$ be the Bergman divergence with respect to $\psi : \mathcal{X} \rightarrow \mathbb{R}$. For any $\mathbf{x}, \mathbf{y} \in \mathrm{int}\ \mathcal{X}$ and $\mathbf{z} \in \mathcal{X}$, 
+\begin{center}
+$B_{\psi}(\mathbf{z}, \mathbf{x}) + B_{\psi}(\mathbf{x}, \mathbf{y}) - B_{\psi}(\mathbf{z}, \mathbf{y}) = \langle \nabla \psi(\mathbf{y}) - \nabla \psi(\mathbf{x}), \mathbf{x} - \mathbf{y} \rangle$.
+\end{center}
+\end{prop}
+\begin{algorithm}
+\caption{Online Mirror Descent}
+\begin{algorithmic}
+\Require{Stopping time T}
+\For {$t=1 \dots T$}
+\State Player makes decision $\mathbf{x}_t$
+\State Player suffers $f_t(\mathbf{x}_t)$, and observes $f_t$
+\State Update $\displaystyle \mathbf{x}_{t+1} = \argmin_{\mathbf{y} \in \mathcal{X}}\ \langle \nabla f_t(\mathbf{x}_t), \mathbf{y} \rangle\ + B_{\psi}(\mathbf{y}, \mathbf{x}_t)$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+\begin{rem}
+Note in order for the algorithm to work, we need $\mathbf{x}_{t} \in \mathrm{int} \mathcal{X}$ because we should be able to compute $B_\psi(\mathbf{y}, \mathbf{x}_t)$ at each update step. Either of the following conditions ensures $\mathbf{x}_t$ to lie in the interior of $\mathcal{X}$:
+\begin{itemize}
+    \item $\psi$ is Legendre, $i.e.\ \lim_{\mathbf{x} \rightarrow \partial \mathcal{X}} \lVert \psi(\mathbf{x}) \rVert = +\infty$
+    \item $\psi$ can be $\mathcal{C}^1$-extended to open subset $\mathcal{X}^{\prime} \subset \mathbb{R}^d$
+\end{itemize}
+\end{rem}
+
+\subsection{Bandit Problems}
+
+\begin{defn} [Bandit Convex Programming] Let $\mathcal{X} \subset \mathbb{R}^d$ be a non-empty convex set of feasible actions and $(f_t)_{t \geq 1}$ be a sequence of convex loss functions. Let $N \geq 1$ be the number of queries per round. On each round $t = 1, 2, ..., T$,
+\begin{itemize}
+    \item Player makes decisions $\mathbf{x}_t^{(i)} \in \mathcal{X}, i \in [N]$
+    \item Player suffers losses $f_t(\mathbf{x}_t^{(i)}), i \in N$, and observes these values.
+\end{itemize}
+\end{defn}
+In this paper, we discuss the cases when $N = 1$ or $2$, as they are the most common. 
+
+We note key differences between OCP and BCP
+
+% what is MAB
+An important class of online learning problem with bandit feedback is multi-armed bandit (MAB). Here, each time we . Two main versions of MAB are stochastic MAB and adversarial MAB, with latter being the focus. Unlike stochastic MAB, where the rewards are perturbed by a random noise, in adversarial MAB the environment (adversary) has full knowledge of our algorithm, 
+
+\subsection{Prediction with Expert Advice}
+Many problems can be framed as online convex programming problems. One class of problems that is worth of a special mention is \textbf{prediction with expert advice}. Here, the player makes decision after witnessing advice from each experts. The precise mathematical formulation of this problem is as follows \cite{CesaBianchi2006PredictionLA}:
+\begin{defn}[Prediction from Expert Advice]
+Let $\mathcal{X} \subset \mathbb{R}^d$ be a non-empty closed convex set of feasible actions and $(f_t)_{t \geq 0}$ be a sequence of convex loss functions. Let $n$ be the number of experts. On each round $t = 1, \dots T$,
+\begin{itemize}
+    \item Expert $i \in [n]$ gives advice $\mathbf{x}_t^{(i)} \in \mathcal{X}$
+    \item Player makes a decision $\mathbf{x}_t \in \mathcal{X}$
+    \item Player suffers a loss $f_t(\mathbf{x}_t)$. 
+    \item Expert $i \in [n]$ suffers a loss $f_t(\mathbf{x}_t^{(i)})$, and observes $f_t$
+\end{itemize}
+\end{defn}
+
+Key challenge in prediction with expert advice is deciding how to aggregate expert opinions. 
+
+\section{Minimax Optimality}
+We showed that OGD attains $O(\sqrt{T})$ regret bound. A natural follow-up question is whether there exists an algorithm that can guarantee lower regret bound. We would like to  To answer this we introduce the notion of minimax regret.
+\begin{defn}[Minimax Regret] \label{def:minimax}
+Consider a online convex programming problem with feasible set $\mathcal{X}$, and a function space $\mathcal{F}$ where the loss functions belong. The minimax regret of the online convex programming problem is
+\begin{center}
+    $\displaystyle V_T(\mathcal{X}, \mathcal{F}) = \inf_{\pi \in \Pi} \sup_{\epsilon \in \mathcal{E}} \left( \sum_{t=1}^{T} f_t(\mathbf{x}_t) - \min_{\mathbf{x} \in \mathcal{X}} \sum_{t=1}^{T} f_t(\mathbf{x}) \right)$
+    % $\displaystyle \hat{V}_T(\mathcal{X}, \mathcal{F}) =\inf_{\mathbf{x}_1 \in \mathcal{X}} \sup_{f_1 \in \mathcal{F}} \dots \inf_{\mathbf{x}_T \in \mathcal{X}} \sup_{f_T \in \mathcal{F}} \left(\sum_{t=1}^{T} f_t(\mathbf{x}_t) - \inf_{\mathbf{x} \in \mathcal{X}} \sum_{t=1}^{T} f_t(\mathbf{x}) \right)$
+\end{center}
+\end{defn}
+
+\begin{prop}\cite[Theorem~4.2]{Abernethy2008OptimalSA}
+Consider a online convex programming problem with a feasible set $\mathcal{X} = \{\mathbf{x} \in \mathbb{R}^d : \lVert \mathbf{x} \rVert_{2} \leq D/2\}$ and a set $\mathcal{F}$ to which the loss functions belong. Then, the minimax regret satisfies 
+\begin{center}
+    $V_T(\mathcal{X}, \mathcal{F}) \geq \frac{GD}{2}\sqrt{T}$
+\end{center}
+\end{prop}
+\begin{proof}
+We only prove the case when the function space is the set of linear functions with uniformly bounded slope $\mathcal{F} = \{f(\mathbf{x}) = \mathbf{w} \cdot \mathbf{x} + \mathbf{b}: \lVert \mathbf{w} \rVert_2 \leq G \}$.
+
+\end{proof}
+\chapter{Dynamic Regret}
+\label{Chap3}
+\section{Dynamic Regret}
+So far the goal of online convex programming is to design an algorithm that performs well against the single best decision in hindsight. However, this objective has two main problems.
+\begin{itemize}
+    \item Comparing the player's action with respect to a single best action is often too pessimistic. 
+    \item Non-stationary
+\end{itemize}
+
+To cope with these issues, we introduce a new objective called \textbf{dynamic regret}.
+\begin{defn}
+Let $(\mathbf{x}_t)_{t=1}^{T}$ be decisions made by our algorithm. Let $(\mathbf{u}_t)_{t=1}^{T}$ be another sequence of feasible actions. Dynamic regret is defined as
+\begin{center}
+    $\displaystyle Reg_{T}^{D}(\mathbf{u}) = \sum_{t=1}^{T}f_t(\mathbf{x}_t) - \sum_{t=1}^{T}f_t(\mathbf{u}_t)$
+\end{center}
+where $f_t$ is a loss function at time $t=1, ..., T$. We call the sequence  $(\mathbf{u}_t)_{t=1}^T$ the comparator sequence.
+\end{defn}
+Dynamic regret can be understood as measuring regret with respect to a given sequence of actions. The non-stationary behavior can be modelled by the comparator sequence, making dynamic regret more reasonable objective than its static counterpart. 
+
+Dynamic regret naturally generalizes static regret by taking a constant comparator sequence $\displaystyle \mathbf{u}_t = \min_{\mathbf{x} \in \mathcal{X}} \sum_{t=1}^{T} f_t(\mathbf{x})$. It also generalizes \textbf{worst-case dynamic regret},
+\begin{center}
+    $\displaystyle Reg_{T}^{WD} = \sum_{t=1}^{T} f_t(\mathbf{x}_t) - \sum_{t=1}^{T} \min_{\mathbf{x} \in \mathcal{X}} f_t(\mathbf{x})$
+\end{center}
+by taking $\displaystyle \mathbf{u}_t \in \argmin_{\mathbf{x} \in \mathcal{X}} f_t(\mathbf{x})$. Note $\displaystyle Reg_T^{WD} = \max_{\mathbf{u}\in \mathcal{X}^T} Reg_T^D(\mathbf{u})$. 
+
+% cite? 
+In general, we can easily find a comparator sequence that prevents sub-linear regret if the player's actions are known a priori, so it is impossible to have an algorithm that attains sub-linear regret bound that is independent of the comparator.
+Therefore, we must relax our objective by letting the regret bound to be dependent on some measure of complexity of the comparator sequence. 
+
+We mainly focus on \textbf{path-length} variation of the comparator sequence
+\begin{center}
+    $\displaystyle P_T(\mathbf{u}) = \sum_{t=2}^{T} \lVert \mathbf{u}_t - \mathbf{u}_{t-1} \rVert$
+\end{center}
+with respect to a given norm $\lVert\ \cdot\ \rVert$. Path-length variation measures how much our comparator shifts during the time period $[1, T]$. Indeed, we expect to recover static regret bound if $P_T(\mathbf{u}) = 0$. 
+
+Another approach equally common in literature is letting regret bound depend on a measure of complexity of the adversarial sequence ($i.e.$ the loss function sequence $(f_t)_{t=1}^T$). 
+For instance, \cite{Besbes2015Nonstationary, Jadbabaie2015OnlineO, Yang2016TrackingSM} each proposes algorithm that depends on functional variation of the loss function sequence
+\begin{center}
+    $\displaystyle V_T^f = \sum_{t=2}^T \sup_{\mathbf{x} \in \mathcal{X}} | f_t(\mathbf{x}) - f_{t-1}(\mathbf{x})|$,
+\end{center}
+while \cite{Chiang2013BeatingBI} considers gradient variation
+\begin{center}
+    $\displaystyle V_T^g = \sum_{t=2}^T \sup_{\mathbf{x} \in \mathcal{X}} | \nabla f_t(\mathbf{x}) - \nabla f_{t-1}(\mathbf{x})|$.
+\end{center}
+These quantities depend only on the adversary's move, hence can be interpreted as a measure of hardness of the problem. In literature, they are mostly used to bound worst-case dynamic regret. See \ref{table:metric} for summary of regret bounds.
+
+It is worth noting that these metrics are not comparable in general. The following example is inspired by \cite{Jadbabaie2015OnlineO}.
+\begin{exmp}
+Consider a prediction with 2-expert problem. 
+\end{exmp}
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{c|c}
+         &  \\
+         & 
+    \end{tabular}
+    \caption{Summary of dynamic regret bounds}
+    \label{table:metric}
 \end{table}
 
+\begin{rem}[Adaptive Regret]
+Another common generalization of static regret is \textbf{(strongly) adaptive regret} \cite{Hazan2007AdaptiveAF, Hazan2009EfficientLA, Daniely2015StronglyAO}, which is defined as the maximum of static regrets on each intervals $I = [r, s] \subseteq [T]$ of length $\tau$,
+\begin{center}
+    $\displaystyle Reg_{T}^{Ad}(\tau) = \sup_{\substack{I=[r, s] \subseteq [T] \\ |I|\ =\ \tau}} \left\{\sum_{t=r}^s f_t(\mathbf{x}_t) - \min_{\mathbf{x}_I \in \mathcal{X}} \sum_{t=r}^s f_t(\mathbf{x}_I) \right\}$
+\end{center}
+If the environment is non-stationary, different strategy will be effective on different interval $I \subseteq [T]$.
+The intuition behind adaptive regret is that an algorithm effective against non-stationary environment must adapt well so that it performs well not only globally but also locally.
 
-\chapter{Results}
-\label{Chap3}
-\lipsum[1-4]
-\begin{figure}
-    \centering
-\begin{tikzpicture}
-    \draw[step=1cm,gray,very thin] (-1.9,-1.9) grid (5.9,5.9);
-    \draw[thick,->] (0,0) -- (4.5,0) node[anchor=north west] {x axis};
-    \draw[thick,->] (0,0) -- (0,4.5) node[anchor=south east] {y axis};
-    \draw (0,0) parabola (4,4);
-\end{tikzpicture}
-\caption{Example TikZ Figure}
-\end{figure}
+Dynamic regret and adaptive regret has following relationship \cite[Theorem 3]{Zhang2018DynamicRO}:
+\begin{prop}
+For all comparator sequence $\mathbf{u} \in \mathcal{X}^T$ and for all partition $\mathcal{P} = \{ \mathcal{I}_1, \dots, \mathcal{I}_k \mid k > 0 \}$ of $[T]$,
+\begin{center}
+    $\displaystyle Reg_T^D(\mathbf{u}) \leq \sum_{i=1}^{|\mathcal{P}|} \left\{Reg_T^{Ad}\left(|\mathcal{I}_i|\right) + 2|\mathcal{I}_i| \cdot V_T^f \right\}$
+\end{center}
+where $V_T^f$ is the functional variation of the loss sequence. 
+\end{prop}
+\end{rem}
+\section{Lower bound}
+Now that we have a simple algorithm which achieves a sub-linear regret bound, it is natural to question whether our algorithm is \textit{optimal}. To this end, we extend minimax dynamic regret, which is an extension of minimax regret introduced in 
+\begin{thm}
+    For any online algorithm and any $\tau \in [0, TD]$, there exists a sequence of loss functions $(f_t)_{t=1}^{T}$ and comparators $(\mathbf{u}_t)_{t=1}^{T}$ satisfying assumptions 2 and 3 respectively, where
+\begin{center}
+    $P_T(\mathbf{u}_1, ..., \mathbf{u}_T) \leq \tau \quad \text{and} \quad Reg_T^{D} = \Omega(G\sqrt{T(D^2 + D\tau)})$
+\end{center}
+\end{thm}
+\begin{proof}
+Let $\mathcal{X} = \frac{D}{2}\mathbb{B}$ be a closed ball with radius $D/2$, and $\mathcal{F}$ be a set of convex functions that satisfies Lipschitz continuity assumption 3. 
+
+For $\tau \in [0, TD]$, let $\mathcal{C}(\tau)$ be the set of comparator sequences whose path-lengths are no more than $\tau$. Consider the following adaptation of minimax value  
+\end{proof}
+
+\section{Algorithm}
+Zinkevich \cite{Zinkevich2003OnlineCP} first introduced dynamic regret in online convex optimization setting. In this paper, he showed a simple baseline algorithm, OGD with constant step size, has a sub-linear regret bound.  
+\begin{thm}
+\label{thm:mirror-dynamic}
+Consider online mirror descent with Bergman divergence $B_\psi$ defined by $\lambda$-strongly convex function $\psi : \mathcal{X} \rightarrow \mathbb{R}$ and a constant step size $\eta > 0$, 
+\begin{center}
+    $\mathbf{x}_{t+1} = \Pi_{\mathcal{X}}[\mathbf{x}_t - \eta \nabla f_{t}(\mathbf{x}_t)], \quad \forall t \geq 1$
+\end{center}
+Then the algorithm guarantees regret bound
+\begin{center}
+    $Reg_{T}^{D}(\mathbf{u}) = O(\sqrt{T}(1 + P_T))$
+\end{center}
+\end{thm}
+\begin{proof}
+Summing the inequality from $t = 1, \dots, T$, we have
+\begin{flalign*}
+    \sum_{t=1}^T f_t(\mathbf{x}_t)& - f_t(\mathbf{u}_t) 
+    \leq \sum_{t=1}^{T} \frac{1}{2\eta}(\lVert \mathbf{x}_t - \mathbf{u}_t \rVert_2^2 - \lVert \mathbf{x}_{t+1} - \mathbf{u}_t \rVert_2^2) + \frac{\eta}{2} \lVert \nabla f_t(\mathbf{x}_t) \rVert_2^2
+    \\
+    & \leq \sum_{t=1}^{T} \frac{1}{2\eta}(\lVert \mathbf{x}_t \rVert_2^2 - \lVert \mathbf{x}_{t+1} \rVert_2^2 + 2 \langle \mathbf{u}_t, \mathbf{x}_{t+1} - \mathbf{x}_t \rangle) + \frac{\eta}{2} \sum_{t=1}^{T} \lVert \nabla f_t(\mathbf{x}_t) \rVert_2^{2}
+    \\
+    & \leq \frac{1}{2\eta} (\lVert \mathbf{x}_1 \rVert_2^2 - \lVert \mathbf{x}_{T+1} \rVert_2^2 + \sum_{t=1}^{T} 
+\end{flalign*}
+\end{proof}
+From the proof of theorem ??, we have regret bound $Reg_{T}^{D}(\mathbf{u}) \leq \frac{7D^2}{4\eta} + \frac{D}{\eta}P_T(\mathbf{u}) + \frac{\eta T}{2}G^2$. 
+By setting the learning rate to be $\eta^{\ast} = O(\sqrt{\frac{1+P_T}{T}})$, we can attain optimal regret bound of order $Reg_{T}^{D} = O(\sqrt{(1+P_T)T})$. 
+However, since our learning rate depends on the path length, the bound depends on specific choice of comparator sequence. 
+
+% We therefore face a dilemma; we want our algorithm to guarantee desired regret bound for any comparator, but at the same time, in order for OGD to achieve the regret we desire, it must be tailored to the specific comparator. 
+
+To resolve this issue, we can consider 
+\begin{algorithm}
+\caption{Meta algorithm}\label{ader:meta}
+\begin{algorithmic}[1]
+\Require {A step size $\alpha$, a set $\mathcal{H}$ containing step sizes for experts}
+\For {$t = 1, \dots, T$}
+\State Receive $\mathbf{x}_t^{\eta}$ from each expert $E^{\eta}$
+\State Output $\displaystyle \mathbf{x}_t = \sum_{\eta \in \mathcal{H}} w_{t}^{\eta} \mathbf{x}_t^{\eta}$
+\State Observe the loss function $f_t$
+\State Update the weight of each expert by \[
+    w_{t+1}^{\eta} = \frac{w_t^{\eta}e^{-\alpha f_t(\mathbf{x}_t^{\eta})}}{\sum_{\nu \in \mathcal{H}}w_t^{\nu}e^{-\alpha f_t(\mathbf{x}_t^{\nu})}}
+\]
+\State Send gradient $\nabla f_t(\mathbf{x}_t^{\eta})$ each expert $E^{\eta}$ 
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+\begin{thm}
+Let $\mathcal{H} = \left\{ \eta_i = \frac{2^{i-1}D}{G}\sqrt{\frac{1}{T}} \mid i = 1, \dots, N \right\}$, where N = 
+\end{thm}
+\section{Exploiting Prior Knowledge}
+In many cases, we would like to compare our algorithm against a comparator sequence that has has some patterns.
+
+
+
 \chapter{Discussion}
 \label{Chap4}
-\lipsum[9-10]
 
 \renewcommand{\bibname}{Bibliography}
-\bibliographystyle{apacite}
+\bibliographystyle{unsrt}
 \bibliography{Bibliography.bib}
 
-\begin{appendices}
-\chapter{Appendix Example}
-\end{appendices}
+% \begin{appendices}
+% \chapter{Appendix Example}
+% \end{appendices}
 
 \end{document}
+
+
+%% Figure (Graph)
+% 
+% \begin{figure}
+%     \centering
+% \begin{tikzpicture}
+%     \draw[step=1cm,gray,very thin] (-1.9,-1.9) grid (5.9,5.9);
+%     \draw[thick,->] (0,0) -- (4.5,0) node[anchor=north west] {x axis};
+%     \draw[thick,->] (0,0) -- (0,4.5) node[anchor=south east] {y axis};
+%     \draw (0,0) parabola (4,4);
+% \end{tikzpicture}
+% \caption{Example TikZ Figure}
+% \end{figure}
+
+%% Table
+%
+% \begin{table}[H]
+%   \caption{Example Table}
+%   \small
+%   \centering
+%   \begin{tabular}{lccccr}
+%   \toprule[\heavyrulewidth]\toprule[\heavyrulewidth]
+%   \textbf{C1} & \textbf{C2} & \textbf{C3} & \textbf{C4}\\ 
+%   \midrule
+% \multirow{3}{*}{\textbf{Row}}& Val & Val & \textcolor{igreen}{GreenVal}\\
+%   & & Val  & \textcolor{igreen}{Val}\\
+% & &  & \textcolor{igreen}{Example}\\ \hdashline
+%   \bottomrule[\heavyrulewidth] 
+%   \end{tabular}
+% \end{table}
+
+%% Two line of research
+%% 1. restrict the benchmark 
+%% 2. characterize niceness of environment
+
+
+\begin{comment}
+% \begin{prop}\label{prop:ogd-bound}
+% Consider OGD with constant step size $\eta_t = \eta$ for all $t = 1, \dots, T$. Then, 
+% \begin{center}
+%     $\displaystyle Reg_T^S \leq \frac{1}{2\eta}D^2 + \frac{\eta}{2}G^{2}T$
+% \end{center}
+% \end{prop}
+% \begin{lem} \label{lemma:iteration}
+% Consider an iteration of OGD at time $t$. For all $\mathbf{u} \in \mathcal{X}$,
+% \begin{center}
+%     $\displaystyle f_t(\mathbf{x}_t) - f_t(\mathbf{u}) \leq \frac{1}{2\eta_t}(\lVert \mathbf{x}_t - \mathbf{u}\rVert_{2}^{2} - \lVert \mathbf{x}_{t+1} - \mathbf{u} \rVert_2^2) + \frac{\eta_t}{2}\lVert \nabla f_t(\mathbf{x}_t) \rVert_2^2$
+% \end{center}
+% \end{lem}
+% %% make parenthesis bigger
+% \begin{proof}
+% By proposition \ref{prop:non-expansive} and \ref{prop:grad-is-subgrad}, we have
+% \begin{align*}
+%     \lVert \mathbf{x}_{t+1} - \mathbf{u} \rVert_{2}^2 - \lVert \mathbf{x}_t - \mathbf{u} \rVert_{2}^2 
+%     & \leq \lVert \mathbf{x}_t - \eta_t \nabla f_t(\mathbf{x}_t) - \mathbf{u} \rVert_{2}^2 - \lVert \mathbf{x}_t - \mathbf{u} \rVert_{2}^2
+%     \\
+%     & = -2\eta_t \langle\nabla f_t(\mathbf{x}_t), \mathbf{x}_t - \mathbf{u}\rangle + \eta_t^2\lVert \nabla f_t(\mathbf{x}_t) \rVert_2^2
+%     \\
+%     & \leq -2\eta_t(f_t(\mathbf{x}_t) - f_t(\mathbf{u})) + \eta_t^{2}\lVert \nabla f_t(\mathbf{x}_t) \rVert_2^2
+% \end{align*}
+% Now, rearrange the terms to get the result.
+% \end{proof}
+% \begin{proof}[Proof of Proposition \ref{prop:ogd-bound}]
+% Let $ \mathbf{u} = \argmin_{x \in \mathcal{X}} \sum_{t=1}^{T} f_t(\mathbf{x})$ in lemma \ref{lemma:iteration}. Summing up the inequality in the lemma from $t = 1$ to $T$,
+% \begin{align*}
+%     \sum_{t=1}^{T} f_t(\mathbf{x}_t) - f_t(\mathbf{u}) 
+%     & \leq \sum_{t=1}^{T} \frac{1}{2\eta} (\lVert \mathbf{x}_t - \mathbf{u} \rVert_{2}^{2} - \frac{1}{2} \lVert \mathbf{x}_{t+1} - \mathbf{u} \rVert_{2}^2) + \frac{\eta}{2}\lVert \nabla f_t(\mathbf{x}_t)\rVert_2^2
+%     \\
+%     & = \frac{1}{2\eta} (\lVert \mathbf{x}_1 - \mathbf{u} \rVert_2^2 - \lVert \mathbf{x}_T - \mathbf{u} \rVert_2^2) + \frac{\eta}{2}\sum_{t=1}^{T} \lVert \nabla f_t(\mathbf{x}_t) \rVert_2^2
+%     \\ 
+%     & \leq \frac{1}{2\eta}\lVert \mathbf{x}_1 - \mathbf{u} \rVert_2^2 + \frac{\eta}{2} \sum_{t=1}^{T} \lVert \nabla f_t(\mathbf{x}_t) \rVert_2^2 && (\star)
+%     \\
+%     & \leq \frac{1}{2\eta}D^2 + \frac{\eta}{2}G^2T \qedhere
+% \end{align*}
+% \end{proof}
+% Note the optimal learning rate is $\eta^{\star} = \frac{D}{G\sqrt{T}}$, which gives regret bound of order $O(\sqrt{T})$. Therefore, OGD with constant step size guarantees a sub-linear regret bound. 
+% It is worthwhile noting that the role assumption \ref{assumption:3} plays in the analysis. 
+% The optimal learning rate of regret bound (\star) is $\eta = \lVert \mathbf{x}_1 - \mathbf{u} \rVert \sqrt{\sum_{t=1}^{T} \lVert \nabla f_t(\mathbf{x}_t) \rVert_2^2$. 
+% However, this learning rate is unavailable to the player, since it depends on the gradients of the loss functions, of which the player has no knowledge. 
+\end{comment}
