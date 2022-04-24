@@ -19,15 +19,16 @@
 \newtheorem{thm}{Theorem}[section]
 \newtheorem{lem}[thm]{Lemma}
 \newtheorem{prop}[thm]{Proposition}
-\newtheorem*{cor}{Corollary}
+\newtheorem{cor}{Corollary}
 \theoremstyle{definition}
 \newtheorem{defn}{Definition}[section]
 \newtheorem{exmp}{Example}[section]
 \theoremstyle{remark}
-\newtheorem*{rem}{Remark}
+\newtheorem{rem}{Remark}
 \newtheorem*{note}{Note}
 
 \usepackage{algorithm}
+\usepackage{algcompatible}
 \usepackage{algpseudocode}
 
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
@@ -274,3 +275,5 @@ intersections
 \setlength{\belowdisplayskip}{0pt}
 \setlength{\abovedisplayshortskip}{0pt}
 \setlength{\belowdisplayshortskip}{0pt}
+
+\allowdisplaybreaks
