@@ -1,6 +1,28 @@
 \documentclass[12pt, a4paper]{report}
-\input{Packages.tex}
-\hypersetup{pdftitle = Thesis, pdfauthor = {First Last}, pdfstartview=FitH, pdfkeywords = essay, pdfpagemode=FullScreen, colorlinks, anchorcolor = red, citecolor = blue, urlcolor=blue, filecolor=green, linkcolor=red, plainpages=false}
+
+\usepackage[english]{babel}
+\usepackage{fancyhdr}
+\usepackage{rotating}
+\usepackage{eso-pic}
+\usepackage{hyperref}
+\makeatletter
+\newcommand\BackgroundPicturea[3]{
+	\setlength{\unitlength}{1pt}
+	\put(0,\strip@pt\paperheight){
+		\parbox[t]{\paperwidth}{
+			\vspace{#2}\hspace{#3}
+			\mbox{\includegraphics[scale=0.5]{#1}}
+}}}
+\newcommand\BackgroundPictureb[3]{
+	\setlength{\unitlength}{1pt}
+	\put(0,\strip@pt\paperheight){
+		\parbox[t]{\paperwidth}{
+			\vspace{#2}\hspace{#3}
+			\mbox{\includegraphics[scale=0.3]{#1}}
+}}}
+\makeatother
+
+
 \pagestyle{fancy}
 \chead{}
 \lhead{University of Oxford}
