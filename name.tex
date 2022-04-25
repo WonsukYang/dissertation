@@ -1,5 +1,7 @@
+%%%% Start of tex file
 \documentclass[12pt, a4paper]{report}
 
+% Packages for title page
 \usepackage[english]{babel}
 \usepackage{fancyhdr}
 \usepackage{rotating}
@@ -25,8 +27,8 @@
 
 \pagestyle{fancy}
 \chead{}
-\lhead{University of Oxford}
-\lfoot{\date{\today}}
+% \lhead{University of Oxford}
+% \lfoot{\date{\today}}
 \cfoot{}
 \rfoot{\thepage}
 
@@ -39,15 +41,21 @@
 \\ Candidate Number: 1066480
 \\
 \\ University of Oxford
-\\
-A dissertation submitted for the degree of \\ \textit{Master of Science}
+\\ \\
+A dissertation submitted for the degree of \\ \\ \textit{Master of Science}
 \\ \\
 Trinity 2022
 \\  
 }
+%%%%%% 
 \begin{document}
+%%%%% start of title page %%%%% 
 \AddToShipoutPicture*{\BackgroundPicturea{Logos/logo2.png}{0.7in}{5.8in}}
 \thispagestyle{headings}
 	\maketitle
-\FloatBarrier
+%%%%% end of title page %%%%%
+
+\pagestyle{plain}
+
+Hello, world!
 \end{document}
