@@ -25,7 +25,7 @@
 \date{24.04.22}
 
 \title{Online Learning, Non-stationary Environment, and Dynamic Regret}
-\author{\\ %\Large{Wonsuk Yang}
+\author{\\ 
 \\
 \\
 \\ Candidate Number: 1066480
@@ -51,11 +51,11 @@ Trinity 2022
 %% !!!! ABSTRACT HERE !!!!
 %
 \begin{abstract}
-The main topic of this work is dynamic regret and non-stationary environment. Unlike conventional online learning framework, where the environment is assumed to follow a fixed policy, in practice environment changes its strategy as the time progresses. In such a case, static regret, a difference between cumulative loss of the player and that incurred by the best decision in hindsight, may lead to sub-optimal algorithm.
+The main topic of this work is dynamic regret and non-stationary environment. Unlike conventional online learning framework, where the environment is assumed to follow a fixed policy, in practice environment continuously changes its strategy as the time progresses. In such a case, static regret, a difference between cumulative loss of the player and that incurred by the best decision in hindsight, may lead to sub-optimal algorithm.
 
 Dynamic regret is a generalization of ordinary regret where the player's strategy is compared against a comparator sequence. The change in environment can be modelled through the comparator, making dynamic regret a reasonable objective when taking non-stationary environment into account. 
 
-The main goal of this work is to introduce dynamic regret and discuss algorithms which allow sub-linear regret bound that depends on a measure of shifts within the comparator. While standard algorithms like online gradient descent cannot attain minimax optimal regret bound without knowing path-length of the comparator, this issue can be resolved by aggregating results from algorithms which runs in parallel but with different learning rates. We then apply this technique to new setting: prediction with expert advice problem.
+The main goal of this work is to introduce dynamic regret and discuss algorithms which allow sub-linear regret bound that depends on a measure of shifts within the comparator. While standard algorithms like online gradient descent cannot attain minimax optimal regret bound without knowing path-length of the comparator, this issue can be resolved by aggregating results from algorithms which runs in parallel but with different learning rates. We apply the same technique to tracking the best expert problem. 
 
 % \keywords{Keyword1 - Keyword2 - Keyword3}
 % % \vspace{-10mm} %To remove added white space after
@@ -73,16 +73,17 @@ The main goal of this work is to introduce dynamic regret and discuss algorithms
 \chapter{Introduction}
 \pagenumbering{arabic}
 \section{Motivation}
-Decision making problems are prevalent across multiple areas of research and application, and in many cases, we are suppose to choose the best action "on the fly", that is, we make our decision sequentially based on the streaming data. Online learning is a field of research about design and analysis of strategies that tackle these sequential decision making problems. Online learning framework generalizes multiple real-life problems: recommendation systems, online portfolio selection, and online shortest path to name a few.
+Decision making problems are prevalent across multiple areas of research and application, and in many cases, we are suppose to choose the best action "on the fly", that is, we make our decision sequentially based on the streaming data. Online learning is a field of research about design and analysis of strategies that tackle these sequential decision making problems. Online learning framework abstracts multiple real-life problems: recommendation systems, online portfolio selection, and online shortest path to name a few.
 
-
-A concept that stands on the opposite side of online learning is offline (batch) learning. Here, the data is collected and stored beforehand, and hence is considered to be static. Thus, online learning problem adds an extra challenge to offline learning problem in that our strategy must be able to forecast an unseen adversary.
+A notion that stands on the opposite side of online learning is offline (batch) learning. Here, the data is collected and stored beforehand, and hence is considered to be static. Online learning problem adds an extra challenge to offline learning problem in that our strategy must be able to forecast an unseen adversary.
 
 In online learning framework we typically assume that the environment is \textit{oblivious}, that is, the losses are sampled from a \textbf{fixed} distribution before the player makes any decision. However, the assumption is often unrealistic in practice, since the distribution from which the losses are sampled are likely to change as the time progresses, $i.e.,$ our environment is non-stationary. 
 
 In conventional online learning setting, the effectiveness of player's strategy is measured by (static) regret, which compares the strategy against the best decision in hindsight. Algorithm with small static regret may converge to a fixed decision, which is sub-optimal when up against dynamic environment. Dynamic regret, which measures the cumulative loss incurred by the player's strategy to that by an arbitrary sequence of actions, is a generalization of static regret. This is a reasonable alternative of static regret when the environment is changing, since we can allow the comparator to model the non-stationary behavior. 
 
-While standard algorithms like online gradient descent can guarantee sub-linear dynamic regret bound, they require a priori knowledge of the comparator sequence. To reiterate the challenge, we want a regret bound that holds for any comparator sequence but to obtain tighter bound, the algorithm must be tailored to specific sequence. In this work, we investigate work of Zhang et. al. \cite{Zhang2018AdaptiveOL}, which presents an algorithm which is both oblivious to the comparator sequence and yet guarantees regret bound which is minimax optimal. While their work is tailored to solving general online convex optimization problem using online gradient descent, we seek to generalize their work so that we can apply their technique to a broader class of online convex optimization problem settings and algorithms.
+While standard algorithms like online gradient descent can guarantee sub-linear dynamic regret bound, they require a priori knowledge of the comparator sequence. To reiterate the challenge, we want a regret bound that holds for any comparator sequence but to obtain tighter bound, the algorithm must be tailored to specific sequence. 
+
+In this work, we investigate work of Zhang et. al. \cite{Zhang2018AdaptiveOL}, which presents an algorithm which is both oblivious to the comparator sequence and yet guarantees regret bound which is minimax optimal. While their work is tailored to solving general online convex optimization problem using online gradient descent, we seek to generalize their work so that we can apply their technique to a broader class of online convex optimization problem settings and algorithms.
 
 The contribution of this work is the following.
 \begin{itemize}
@@ -164,7 +165,7 @@ Depending on what information we gain about the loss function, we have two diffe
     \item Full Information: Player observes $f_t$, or more commonly, $\nabla f_t(\mathbf{x}_t)$
     \item Bandit: Player only observes $f_t(\mathbf{x}_t)$
 \end{itemize}
-Unless stated otherwise, we will assume \textit{oblivious} adversary and \textit{full information} setting. 
+Unless stated otherwise, we will assume \textit{oblivious} adversary and \textit{full information} setting. In most cases, we will use the gradient $\nabla f_t(\mathbf{x}_t)$ to update our strategy. We henceforth assume the existence of \textit{first-order oracle}, that is, the gradient will always be provided to the player.
 
 Regret measures the difference between total loss incurred by the player and that incurred by a single best action in hindsight. The player is "successful" if in the long run, the average regret goes to 0, $i.e.\ Reg_{T}^S = o(T)$.
 Thus, the main objective in online learning is to propose an algorithm which produces a sequence $(\mathbf{x}_t)_{t \geq 1}$ that guarantees sub-linear regret bound.
@@ -186,7 +187,7 @@ Online gradient descent (OGD), an online version of gradient descent first intro
 \Require{Stopping time $T$, initial value $\mathbf{x}_1 \in \mathcal{X}$, step sizes $(\eta_t)_{t \geq 0}$}
 \For {$t = 1, ..., T$}
 \State Player makes decision $\mathbf{x}_t$
-\State Player suffers loss $f_t(\mathbf{x}_t)$, observes $f_t$
+\State Player suffers loss $f_t(\mathbf{x}_t)$, observes $\nabla f_t(\mathbf{x}_t)$
 \State Update $\mathbf{x}_{t+1} = \Pi_{\mathcal{X}} (\mathbf{x}_t - \eta_t \nabla f_t(\mathbf{x}_t))$
 \EndFor
 \end{algorithmic}
@@ -287,7 +288,7 @@ We now introduce the online mirror descent (OMD) algorithm.
 \Require{Stopping time $T$, initial value $\mathbf{x}_1 \in \mathcal{X}$, step sizes $(\eta_t)_{t=1}^T$}
 \For {$t=1 \dots T$}
 \State Player makes decision $\mathbf{x}_t$
-\State Player suffers $f_t(\mathbf{x}_t)$, and observes $f_t$
+\State Player suffers $f_t(\mathbf{x}_t)$, and observes $\nabla f_t(\mathbf{x}_t)$
 \State Update $ \mathbf{x}_{t+1} = \Pi_{\mathcal{X}, \psi}(\nabla \psi^{*}(\nabla \psi(\mathbf{x}_t) - \eta_t \nabla f_t(\mathbf{x}_t)))$
 \EndFor
 \end{algorithmic}
@@ -461,7 +462,7 @@ Note we can easily extend the conclusion of the proposition to convex losses sin
 
 
 \section{Prediction with Expert Advice}\label{section:expert-advice}
-Expert problem is one of the most investigated classes of online learning problem. Here, the player makes a decision after witnessing advice from a number of experts, where the number of experts is finite. This problem is theoretically interesting in its own right, but also has many applications and particularly necessary for our main algorithm in \ref{Chap3}. The precise mathematical formulation of this problem is as follows \cite{CesaBianchi2006PredictionLA}:
+Expert problem is one of the most investigated classes of online learning problem. Here, the player makes a decision after witnessing advice from a number of experts, where the number of experts is finite. This problem is theoretically interesting in its own right, but also has many applications and particularly necessary for our main algorithm in chapter \ref{Chap3}. The precise mathematical formulation of this problem is as follows \cite{CesaBianchi2006PredictionLA}:
 \begin{defn}[Prediction from Expert Advice]
 Let $\mathcal{X} \subset \mathbb{R}^d$ be a non-empty closed convex set of feasible actions and $(f_t)_{t \geq 0}$ be a sequence of loss functions. Let $n$ be the number of experts. 
 
@@ -545,7 +546,7 @@ The final algorithm, described in figure \ref{alg:eg}, is called exponentiated g
 \Require{Stopping time $T$, initial value $\mathbf{x}_1 \in \mathrm{int} \Delta^{n-1}$, step size $\eta$}
 \For{$t= 1, \dots T$}
 \State Player plays $\mathbf{x}_t$
-\State Player suffers $f_t(\mathbf{x}_t)$, and observes $f_t$
+\State Player suffers $f_t(\mathbf{x}_t)$, and observes $\nabla f_t(\mathbf{x}_t)$
 \State Update $\mathbf{x}_{t+1, j} \propto \mathbf{x}_{t, j}\exp(-\eta [\nabla f_t(\mathbf{x}_t)]_j)$ for all $j = 1, \dots, d$
 \EndFor
 \end{algorithmic}
@@ -868,11 +869,11 @@ It is clear from the description of the main idea that the controller algorithm 
 \State Run a set of worker algorithm $\{E^{\eta} \mid \eta \in \mathcal{H} \}$ each with step size $\eta$ 
 \State Receive $\mathbf{x}_t^{\eta}$ from each worker $E^{\eta}$
 \State Output $\displaystyle \mathbf{x}_t = \sum_{\eta \in \mathcal{H}} w_{t}^{\eta} \mathbf{x}_t^{\eta}$
-\State Observe the loss function $f_t$
+\State Observe $\nabla f_t(\mathbf{x}_t)$
 \State Update the weight of each worker by \[
-    w_{t+1}^{\eta} = \frac{w_t^{\eta}e^{-\alpha \nabla f_t(\mathbf{x}_t^{\eta})}}{\sum_{\nu \in \mathcal{H}}w_t^{\nu}e^{-\alpha \nabla f_t(\mathbf{x}_t^{\nu})}}
+    w_{t+1}^{\eta} = \frac{w_t^{\eta}e^{-\alpha [\nabla f_t(\mathbf{x}_t)]_{\eta}}}{\sum_{\nu \in \mathcal{H}}w_t^{\nu}e^{-\alpha [\nabla f_t(\mathbf{x}_t})]_{\nu}}
 \]
-\State Send gradient $\nabla f_t(\mathbf{x}_t^{\eta})$ each worker $E^{\eta}$ 
+\State Send gradient $[\nabla f_t(\mathbf{x}_t)]_{\eta}$ each worker $E^{\eta}$ 
 \EndFor
 \end{algorithmic}
 \end{algorithm}
@@ -909,6 +910,7 @@ for some $k \in \{1, \dots, N \}$
 \end{prop}
 \begin{proof}
 Recall from proposition \ref{thm:mirror-dynamic} that online mirror descent with constant step size $\eta$ attains regret bound of the form
+
 \begin{equation*}
     \sum_{t=1}^T f_t(\mathbf{x}_t) - f_t(\mathbf{u}_t) \leq \frac{D^2 + DP_T}{\eta} + \frac{\eta TG^2}{2}
 \end{equation*}
@@ -936,7 +938,7 @@ The regret bound in proposition \ref{ader:bound} depends on how to setup initial
 
 We can simply put uniform weight on all workers, $i.e., \mathbf{w}_1 = (1/|\mathcal{H}|, \dots, 1 / |\mathcal{H}|)$. However, since $|\mathcal{H}| = O(\log T)$, the regret bound matches the lower bound $\Omega(\sqrt{(1+P_T)T})$ only up to neglecting logarithmic factor $\log \log T$.
 
-One way to get a bound without $\log \log T$ is to set $w_{1, \eta_k}$ inversely proportional to $k$. This will allow $\log w_{1, \eta_k}$ to be function of $k$, which will end up to be a term of order $\sqrt{T}\log P_T$, which is less than $\sqrt{T P_T}$. For instance, we can set $w_{1, \eta_k} = \frac{C}{k(k+1)}$, where $C = 1 - \frac{1}{|\mathcal{H}|+1}$ as suggested in \cite{Zhang2018AdaptiveOL}. Since $w_{1, \eta_k} \geq \frac{1}{k(k+1)} \geq 1/k^2$, we get a regret bound
+One way to get a bound without $\log \log T$ factor is to set $w_{1, \eta_k}$ inversely proportional to $k$. This will allow $\log w_{1, \eta_k}$ to be function of $k$, which will end up to be a term of order $\sqrt{T}\log P_T$. Note this is smaller than $\sqrt{T P_T}$. For instance, we can set $w_{1, \eta_k} = \frac{C}{k(k+1)}$, where $C = \frac{|\mathcal{H}|}{|\mathcal{H}|+1}$ as suggested in \cite{Zhang2018AdaptiveOL}. Since $w_{1, \eta_k} \geq \frac{1}{k(k+1)} \geq 1/k^2$, we get a regret bound
 \begin{equation*}
     Reg_T^D \leq \frac{3}{2}\sqrt{2(D^2 + DP_T)TG^2} + \frac{\sqrt{2Tc^2}}{2}(1 + 2 \log k) = O(\sqrt{T(1 + P_T)})
 \end{equation*}
@@ -946,7 +948,9 @@ One way to get a bound without $\log \log T$ is to set $w_{1, \eta_k}$ inversely
 We now turn our attention to prediction with expert advice problem. Previously, the player's decision is compared against decisions made by best expert. Now, we add additional dimension to the problem by comparing to a strategy that can switch a number of times which expert to take advice from. These problems occur naturally in practice; for instance, we would like to set up a recommendation strategy that can adapt to any preference change of customers. 
 % In this section, we will not restrict to the case where the feasible set $\mathcal{X}$ of the problem is convex and hence introduce randomness to the strategy.
 
-In this scenario, dynamic regret is often called as tracking regret, since the goal of the algorithm is to track the expert that locally yields best decision at each round $t$, and often prediction with expert advice problem with non-constant comparator is called \textbf{tracking the best expert problem}. Mathematically speaking, for given time horizon $T$ and number of experts $n$, dynamic regret of prediction with expert advice problem is given as
+In this scenario, dynamic regret is often called as tracking regret, since the goal of the algorithm is to track the expert that locally yields best decision at each round $t$. For this reason, prediction with expert advice problem with non-constant comparator is called \textbf{tracking the best expert problem}. 
+
+Mathematically speaking, for given time horizon $T$ and number of experts $n$, dynamic regret of prediction with expert advice problem is given as
 \begin{equation*}
     Reg_D^T(\mathbf{u}) = \sum_{t=1}^T f_t(\mathbf{x}_t) - \sum_{t=1}^T f_t(\mathbf{u}_t)
 \end{equation*}
@@ -984,7 +988,7 @@ As every element $\mathbf{u} \in \mathcal{C}$ can be decomposed into $m$ constan
 \end{align*}
 \end{proof}
 
-We would like to use theorem \ref{thm:mirror-dynamic} to exponentiated gradient, but we see that the theorem is not fully applicable. The problem is that there is no constant $M$ such that $B_\psi(\mathbf{u}_{t+1}, \mathbf{x}_{t+1}) - B_\psi(\mathbf{u}_t, \mathbf{x}_{t+1}) \leq M \lVert \mathbf{u}_{t+1} - \mathbf{u}_t \rVert_1$ for all $\mathbf{x}_{t+1} \in \mathrm{int} \Delta^{n-1}$. In particular, the problem happens because $\mathbf{x}_{t+1}$ can be arbitrary close to the boundary of $\Delta^{n-1}$. Thus, we need modify exponentiated gradient so that weight vector stays away from the boundary (see figure \ref{alg:modified-eg}).
+We would like to use theorem \ref{thm:mirror-dynamic} to exponentiated gradient but we cannot. The problem is that there is no constant $M$ such that $B_\psi(\mathbf{u}_{t+1}, \mathbf{x}_{t+1}) - B_\psi(\mathbf{u}_t, \mathbf{x}_{t+1}) \leq M \lVert \mathbf{u}_{t+1} - \mathbf{u}_t \rVert_1$ for all $\mathbf{x}_{t+1} \in \mathrm{int} \Delta^{n-1}$. In particular, the problem happens because $\mathbf{x}_{t+1}$ can be arbitrary close to the boundary of $\Delta^{n-1}$. Thus, we need modify exponentiated gradient so that weight vector stays away from the boundary (see figure \ref{alg:modified-eg}).
 
 One way to achieve this is to project the result from multiplicative update on the convex set $\Delta_\alpha^{n-1} = [\alpha/n, 1]^{n} \cap \Delta^{n-1}$ using Bergman projection $\Pi_{\Delta_\alpha^{n-1}, \psi}$ for some $\alpha \in (0, 1)$.  This was first introduced in \cite{Herbster2001Tracking} in their study of shifting regret in prediction with expert advice problem. We prove the regret bound of this method. As in section \ref{section:expert-advice}, we assume linear loss, and for simplicity, let the value of all loss function lie in the interval $[0, 1]$.
 
@@ -1047,7 +1051,7 @@ Therefore, summing up individual $f_t(\mathbf{x}_t) - f_t(\mathbf{u}_t)$ terms,
     &\leq \frac{\log n + 4\log(n/\alpha) S}{\eta} + \left(\frac{\eta}{2} + \alpha\right)T\qedhere
 \end{align*}
 \end{proof}
-There is two problems with this algorithm. First, the $O(\sqrt{TS\log n})$ bound is not attainable using proposition \ref{prop:pred-dynamic-lower-bound}. Given that $\alpha$ is fixed, optimal bound is 
+There are two problems with this algorithm. First, the $O(\sqrt{TS\log n})$ bound is not attainable using proposition \ref{prop:pred-dynamic-lower-bound}. Provided that $\alpha$ is fixed, optimal bound is 
 \begin{equation*}
     \sum_{t=1}^T f_t(\mathbf{x}_t) - f_t(\mathbf{u}_t) \leq \sqrt{2(\log n + 4 \log(n/\alpha)S)T} + \alpha T
 \end{equation*}
@@ -1059,7 +1063,7 @@ Now, it is easy to see that no $\alpha = \alpha(T)$ can balance $\sqrt{(-\log \a
 \Require{Time horizon $T$, initial value $\mathbf{x}_1 = (1/n, \dots, 1/n) \in \Delta^{n-1}$, step size $\eta$, parameter $\alpha$}
 \For{$t=1, \dots,T$}
 \State Player plays $\mathbf{x}_t$
-\State Player suffers $f_t(\mathbf{x}_t)$ and observes $f_t$
+\State Player suffers $f_t(\mathbf{x}_t)$ and observes $\nabla f_t(\mathbf{x}_t)$
 \State Update 
 \[\Tilde{\mathbf{x}}_{t+1, j} = \frac{\mathbf{x}_{t,j} \exp(-\eta [\nabla f_t(\mathbf{x})]_j)}{\sum_{j=1}^n \mathbf{x}_{t, j} \exp(-\eta [\nabla f_t(\mathbf{x})]_j)}
 \]
@@ -1174,9 +1178,9 @@ Adding this bound with result in proposition \ref{lem:controller}, we obtain
 where we use that $w_{1, k} \geq 1/k^2$ in the last inequality. 
 
 Now, using $k = \lfloor \frac{1}{2} \log_2 \left[ (S+1) + \frac{(T-1)H(\alpha)}{\log n}\right]\rfloor + 1$ and that $H(x) \leq x \log (e/x)$, we obtain regret bound of order 
-\begin{center}
-    $\displaystyle Reg_T^D = O(\sqrt{TS\log n +S\log(T/S)})$
-\end{center}
+\begin{equation*}
+    Reg_T^D = O(\sqrt{TS\log n +S\log(T/S)}) \qedhere
+\end{equation*}
 \end{proof}
 
 \chapter{Conclusion and Future Work}
@@ -1189,7 +1193,7 @@ The main rationale for maintaining a collection of worker algorithms is to remov
 
 Lastly, it would be interesting future work for applying same technique in algorithm \ref{ader:controller} to other specific online convex optimization problem. In particular, applying the technique to multi-armed bandit problem can be promising, as multi-armed bandit has close tie with prediction with expert advice. 
 
-\small{Word Count: 6360}
+\small{Word Count: 6415}
 
 \renewcommand{\bibname}{Bibliography}
 \bibliographystyle{unsrt}
